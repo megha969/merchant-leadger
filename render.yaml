@@ -1,0 +1,20 @@
+services:
+  - type: web
+    name: merchant-ledger
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: >
+      python -c "from app.database import engine, Base; from app.models.models import *; Base.metadata.create_all(engine)" &&
+      python scripts/seed.py &&
+      uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: merchant-ledger-db
+          property: connectionString
+
+databases:
+  - name: merchant-ledger-db
+    databaseName: ledger
+    user: ledger
+    plan: free
